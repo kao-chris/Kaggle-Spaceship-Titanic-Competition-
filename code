@@ -1,0 +1,250 @@
+# This Python 3 environment comes with many helpful analytics libraries installed
+# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python
+# For example, here's several helpful packages to load
+
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+
+# Input data files are available in the read-only "../input/" directory
+# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
+
+import os
+for dirname, _, filenames in os.walk('/kaggle/input'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+//創造環境
+!pip install mglearn
+import mglearn
+!pip install scikit-learn
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from pandas.plotting import scatter_matrix
+from sklearn.datasets import make_blobs
+//訓練集
+train_text = pd.read_csv('/kaggle/input/spaceship-titanic/train.csv')
+print(len(train_text))
+train_text.head()
+//引入 sns
+import seaborn as sns
+//觀察那些缺失值 (可視化)
+plt.figure(figsize=(14,8))
+sns.heatmap(train_text.isnull(), yticklabels=False, cmap='hot_r')
+//觀察各係數的關係(訓練集)
+sns.heatmap(train_text.corr(),annot = True,cmap="viridis")
+//測試集
+test_text = pd.read_csv('/kaggle/input/spaceship-titanic/test.csv')
+print(len(test_text))
+test_text.head()
+//觀察那些缺失值 (可視化)
+plt.figure(figsize=(14,8))
+sns.heatmap(test_text.isnull(), yticklabels=False, cmap='hot_r')
+//觀察各係數的關係(測試集)
+sns.heatmap(test_text.corr(),annot = True,cmap="viridis")
+//sample 範例 輸出
+sample_text = pd.read_csv('/kaggle/input/spaceship-titanic/sample_submission.csv')
+print(len(sample_text))
+sample_text.head()
+//訓練集內容
+print(train_text.HomePlanet.value_counts())
+
+print(train_text.CryoSleep.value_counts())
+
+print(train_text.Cabin.value_counts())
+
+print(train_text.Destination.value_counts())
+
+print(train_text.Age.value_counts())
+
+print(train_text.VIP.value_counts())
+
+print(train_text.RoomService.value_counts())
+
+print(train_text.FoodCourt.value_counts())
+
+print(train_text.ShoppingMall.value_counts())
+
+print(train_text.Spa.value_counts())
+
+print(train_text.VRDeck.value_counts())
+
+print(train_text.Transported.value_counts())
+//測試集內容
+print(test_text.HomePlanet.value_counts())
+
+print(test_text.CryoSleep.value_counts())
+
+print(test_text.Cabin.value_counts())
+
+print(test_text.Destination.value_counts())
+
+print(train_text.Age.value_counts())
+
+print(test_text.VIP.value_counts())
+
+print(test_text.RoomService.value_counts())
+
+print(test_text.FoodCourt.value_counts())
+
+print(test_text.ShoppingMall.value_counts())
+
+print(test_text.Spa.value_counts())
+
+print(test_text.VRDeck.value_counts())
+//觀察缺失值
+train_text.isnull().sum()
+test_text.isnull().sum()
+//各數據集參數值型態
+train_text.info()
+test_text.info()
+//數據集連續數值平均數
+train_text.describe()
+test_text.describe()
+//HomePlanet缺失值觀看
+print(train_text[train_text.HomePlanet.isnull()])
+print(test_text[test_text.HomePlanet.isnull()])
+//缺失值處理
+//連續性data 缺失值取平均&中位數值
+float_data = ['Age']
+train_text[float_data] = train_text[float_data].fillna(train_text[float_data].mean())
+float_data = ['RoomService','FoodCourt','ShoppingMall','Spa','VRDeck']
+train_text[float_data] = train_text[float_data].fillna(train_text[float_data].median())
+//將浮點數轉為整數
+train_text=train_text.astype({'Age': int,'RoomService': int,'FoodCourt': int,'ShoppingMall': int,'Spa': int,'VRDeck': int})
+train_text.head()
+//連續值參數處理完成(可視圖)
+plt.figure(figsize=(14,8))
+sns.heatmap(train_text.isnull(), yticklabels=False, cmap='hot_r')
+train_text.isnull().sum()
+print(train_text[train_text.VIP.isnull()])
+print(test_text[test_text.HomePlanet.isnull()])
+//連續值缺失處理
+float_data = ['Age']
+test_text[float_data] = test_text[float_data].fillna(test_text[float_data].mean())
+float_data = ['RoomService','FoodCourt','ShoppingMall','Spa','VRDeck']
+test_text[float_data] = test_text[float_data].fillna(test_text[float_data].median())
+test_text=test_text.astype({'Age': int,'RoomService': int,'FoodCourt': int,'ShoppingMall': int,'Spa': int,'VRDeck': int})
+test_text.isnull().sum()
+plt.figure(figsize=(14,8))
+sns.heatmap(test_text.isnull(), yticklabels=False, cmap='hot_r')
+test_text.head()
+//處理Cabin 內容
+print(train_text[train_text.Cabin.isnull()])
+//將Cabin 的內容分開
+train_text['Cabin'].fillna('-',inplace=True)
+
+train_text['Deck'] = train_text['Cabin'].apply(lambda x : x[:1])
+train_text['Num'] = train_text['Cabin'].apply(lambda x :x[-3:-2])
+train_text['Num'].fillna('-',inplace=True)
+train_text['Side'] = train_text['Cabin'].apply(lambda x : x[-1:])
+train_text['Num'].fillna('-',inplace=True)
+train_text.head(20)
+test_text['Cabin'].fillna('-',inplace=True)
+
+test_text['Deck'] = test_text['Cabin'].apply(lambda x : x[:1])
+test_text['Num'] = test_text['Cabin'].apply(lambda x :x[-3:-2])
+test_text['Num'].fillna('-',inplace=True)
+test_text['Side'] = test_text['Cabin'].apply(lambda x : x[-1:])
+test_text.head(30)
+train_text.isnull().sum()
+test_text.isnull().sum()
+//處理 HomePlanet 缺失值
+train_text.HomePlanet.unique()
+print(train_text[train_text.HomePlanet.isnull()])
+train_text.HomePlanet.fillna(train_text.HomePlanet.mode()[0], inplace=True)
+print(train_text[train_text.HomePlanet.isnull()])
+train_text.head(226)
+print(test_text[test_text.HomePlanet.isnull()])
+test_text.HomePlanet.fillna(test_text.HomePlanet.mode()[0], inplace=True)
+print(test_text[test_text.HomePlanet.isnull()])
+test_text.head(277)
+train_text.isnull().sum()
+test_text.isnull().sum()
+//處理 Side Num Deck 缺失值
+train_text['Side'].fillna('-',inplace=True)
+test_text['Side'].fillna('-',inplace=True)
+train_text['Num'].fillna('-',inplace=True)
+test_text['Num'].fillna('-',inplace=True)
+train_text.isnull().sum()
+test_text.isnull().sum()
+train_text.head(40)
+train_text.CryoSleep.value_counts()
+test_text.CryoSleep.value_counts()
+train_text.Destination.value_counts()
+test_text.Destination.value_counts()
+train_text.VIP.value_counts()
+test_text.VIP.value_counts()
+//處理 CryoSleep 缺失值
+print(train_text[train_text.CryoSleep.isnull()])
+train_text.CryoSleep.fillna(train_text.CryoSleep.mode()[0], inplace=True)
+print(train_text[train_text.CryoSleep.isnull()])
+train_text.head(95)
+print(test_text[test_text.CryoSleep.isnull()])
+test_text.CryoSleep.fillna(test_text.CryoSleep.mode()[0], inplace=True)
+print(test_text[test_text.CryoSleep.isnull()])
+test_text.head(70)
+train_text.isnull().sum()
+test_text.isnull().sum()
+//處理 Destination 缺失值
+print(train_text[train_text.Destination.isnull()])
+train_text.Destination.fillna(train_text.Destination.mode()[0], inplace=True)
+train_text.head(50)
+test_text.Destination.fillna(test_text.Destination.mode()[0], inplace=True)
+train_text.isnull().sum()
+test_text.isnull().sum()
+//處理 VIP 缺失值
+print(train_text[train_text.VIP.isnull()])
+train_text.VIP.fillna(train_text.VIP.mode()[0], inplace=True)
+train_text.head(60)
+test_text.VIP.fillna(test_text.VIP.mode()[0], inplace=True)
+train_text.isnull().sum()
+test_text.isnull().sum()
+train_text.dtypes
+test_text.dtypes
+//將布林數轉為正數 true >> 1 false >>0
+train_text=train_text.astype({'CryoSleep': int, 'VIP': int})
+train_text=train_text.astype({'Transported': int})
+train_text.dtypes
+train_text.dtypes
+test_text=test_text.astype({'CryoSleep': int, 'VIP': int})
+test_text.dtypes
+train_text.dtypes
+//Age 分布圖(長條圖)
+plt.figure(figsize=(14,8))
+sns.displot(train_text['Age'], kde=False, bins=8)
+plt.show()
+//Spa 分布圖 (長條圖)
+plt.figure(figsize=(14,8))
+sns.displot(train_text['Spa'], kde=False, bins=5)
+plt.show()
+//關於HomePlanet 跟Age 之間關係的長條圖
+sns.barplot(x = "HomePlanet", y = "Age",data = train_text)
+sns.barplot(x = "HomePlanet", y = "Age",data = test_text)
+//關於HomePlanet 跟CryoSleep 之間關係的長條圖
+plt.figure(figsize=(14,8))
+sns.countplot(data = train_text, x = 'CryoSleep', hue = 'HomePlanet')
+plt.show()
+plt.figure(figsize=(14,8))
+sns.countplot(data = test_text, x = 'CryoSleep', hue = 'HomePlanet')
+plt.show()
+train_text[train_text['HomePlanet'] == 'Europa']['HomePlanet'].value_counts()/len(train_text)
+//關於HomePlanet 跟Destination 之間關係的長條圖
+plt.figure(figsize=(14,8))
+sns.countplot(data = train_text, x = 'Destination', hue = 'HomePlanet')
+plt.show()
+plt.figure(figsize=(14,8))
+sns.countplot(data = test_text, x = 'Destination', hue = 'HomePlanet')
+plt.show()
+//將 Name 欄去掉
+train_text = train_text.drop('Name', axis=1)
+train_text.head()
+test_text = test_text.drop('Name', axis=1)
+test_text.head()
+train_text.isnull().sum()
+test_text.isnull().sum()
+//有缺失值在數據中將會有不同的顏色
+plt.figure(figsize=(14,8))
+sns.heatmap(test_text.isnull(), yticklabels=False, cmap='hot_r')
+plt.figure(figsize=(14,8))
+sns.heatmap(train_text.isnull(), yticklabels=False, cmap='hot_r')
+//關於Deck 跟Destination 之間關係的長條圖
