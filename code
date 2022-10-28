@@ -248,3 +248,195 @@ sns.heatmap(test_text.isnull(), yticklabels=False, cmap='hot_r')
 plt.figure(figsize=(14,8))
 sns.heatmap(train_text.isnull(), yticklabels=False, cmap='hot_r')
 //關於Deck 跟Destination 之間關係的長條圖
+plt.figure(figsize=(14,8))
+sns.countplot(data=train_text, x=train_text['Deck'].sort_values(), hue='Destination')
+plt.show()
+plt.figure(figsize=(14,8))
+sns.countplot(data=test_text, x=test_text['Deck'].sort_values(), hue='Destination')
+plt.show()
+//關於Side 跟Destination 之間關係的長條圖
+plt.figure(figsize=(14,8))
+sns.countplot(data=test_text, x=test_text['Side'].sort_values(), hue='Destination')
+plt.show()
+plt.figure(figsize=(14,8))
+sns.countplot(data=train_text, x=train_text['Side'].sort_values(), hue='Destination')
+plt.show()
+//關於HomePlanet 跟Transported 之間關係的長條圖
+plt.figure(figsize=(14,8))
+sns.countplot(data=train_text, x=train_text['Transported'].sort_values(), hue='HomePlanet')
+plt.show()
+//關於Deck跟CryoSleep 之間關係的長條圖
+plt.figure(figsize=(14,8))
+sns.countplot(data=train_text, x=train_text['Deck'].sort_values(), hue='CryoSleep')
+plt.show()
+plt.figure(figsize=(14,8))
+sns.countplot(data=test_text, x=test_text['Deck'].sort_values(), hue='CryoSleep')
+plt.show()
+//將Deckep Side 的值分出來做判斷
+cabin_deck = pd.get_dummies(train_text['Deck'], drop_first=True)
+cabin_side = pd.get_dummies(train_text['Side'], drop_first=True)
+train_text = pd.concat([train_text,cabin_deck,cabin_side], axis=1)
+train_text = train_text.drop(['Deck','Side'],axis=1)
+cabin_deck_test = pd.get_dummies(test_text['Deck'], drop_first=True)
+cabin_side_test = pd.get_dummies(test_text['Side'], drop_first=True)
+test_text = pd.concat([test_text,cabin_deck_test,cabin_side_test], axis=1)
+test_text = test_text.drop(['Deck','Side'],axis=1)
+train_text = train_text.drop(['Num'],axis=1)
+train_text.info()
+test_text.info()
+train_text = train_text.drop('PassengerId', axis=1)
+train_text['Age'].groupby(train_text['HomePlanet']).median()
+test_text['Age'].groupby(test_text['HomePlanet']).median()
+train_text.isnull().sum()
+train_text = train_text.drop('Cabin',axis=1)
+train_text.isnull().sum()
+//將HomePlanet & Destination 轉為One hot 編碼表示
+data_dum_train = pd.get_dummies(train_text)
+pd.DataFrame(data_dum_train)
+//將Cabin 去除
+data_dum_test = test_text.drop(['PassengerId','Num','Cabin'],axis=1)
+#data_dum_test = test_text.drop('Num',axis=1)
+#data_dum_test = test_text.drop('Cabin',axis=1)
+data_dum_test = pd.get_dummies(data_dum_test)
+pd.DataFrame(data_dum_test)
+data_dum_test.head(10)
+#data_dum_test
+data_dum_train.head(50)
+data_dum_train.head()
+data_dum_train.info()
+//將Transported 去除
+X_train = data_dum_train.drop('Transported',axis=1)
+y_train = data_dum_train['Transported']
+//將Num 去除
+//將X_test裡的PassengerId 去除
+X_test = data_dum_test
+data_dum_test.info()
+data_dum_test.head()
+//模型架設
+//LogisticRegression
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression(C =100)
+scores_list=[]
+model.fit(X_train,y_train)
+ogisticRegression(C=100)
+prediction= model.predict(X_test)
+#scores_list.append(prediction)
+//評估結果
+model.score(X_train, y_train)
+prediction = prediction.astype(str)
+prediction = np.char.replace(prediction,'0','False')
+prediction = np.char.replace(prediction,'1','True')
+print(prediction)
+spaceship_titanic_test = pd.DataFrame({'PassengerId':test_text['PassengerId'], 'Transported':prediction})
+len(spaceship_titanic_test)
+spaceship_titanic_test.to_csv('logspaceship_titanic_l.csv', index=False)
+//SVC
+from sklearn.svm import SVC
+svm_model = SVC(C=10,kernel='rbf',degree=4)
+svm_model.fit(X_train,y_train)
+svm_predicti = svm_model.predict(X_test)
+svm_model.score(X_train,y_train)
+svm_predicti
+svm_predicti = svm_predicti.astype(str)
+svm_predicti= np.char.replace(svm_predicti,'0','False')
+svm_predicti= np.char.replace(svm_predicti,'1','True')
+svm_predicti.shape
+print(svm_predicti)
+spaceship_titanic_test = pd.DataFrame({'PassengerId':test_text['PassengerId'], 'Transported':svm_predicti})
+spaceship_titanic_test.to_csv('logspaceship_titanic_s.csv', index=False)
+text = pd.read_csv("../input/codegoalno1/logspaceship_titanic_s.csv")
+text
+//KNeighborsClassifier
+from sklearn.neighbors import KNeighborsClassifier
+clf=KNeighborsClassifier()
+clf.fit(X_train,y_train)
+KNeighborsClassifier()
+clpred = clf.predict(X_test)
+clpred
+clpred = clpred.astype(str)
+clpred = np.char.replace(clpred,'0','False')
+clpred = np.char.replace(clpred,'1','True')
+clpred
+submissionk = pd.DataFrame(
+    {'PassengerId':test_text["PassengerId"] ,
+     'Transported': clpred},columns=['PassengerId', 'Transported'])
+//輸出CSV
+submissionk.to_csv("submissionkn.csv",index=False)
+text = pd.read_csv('./submissionkn.csv')
+text
+text
+//RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
+clfr=RandomForestClassifier(max_depth=10, random_state=42)
+clfr.fit(X_train,y_train)
+rpred =clfr.predict(X_test)
+rpred
+rpred = rpred.astype(str)
+rpred = np.char.replace(rpred,'0','False')
+rpred = np.char.replace(rpred,'1','True')
+rpred
+submissionr = pd.DataFrame(
+    {'PassengerId':test_text["PassengerId"] ,
+     'Transported': rpred},columns=['PassengerId', 'Transported'])
+submissionr.to_csv("submissionr.csv",index=False)
+text = pd.read_csv('./submissionr.csv')
+text
+//GridSearch
+rf_grid={
+    "n_estimators":[None,100,200,300,400],
+    'max_features': ['auto', 'sqrt', 'log2'],
+    'max_depth' : [None,5,10,15,20,25],
+    'criterion' :['gini', 'entropy']
+ }
+final_class=['Random Forest']
+final_scores=[]
+from sklearn.model_selection import GridSearchCV
+rf_clf=GridSearchCV(estimator=RandomForestClassifier(),param_grid=rf_grid,n_jobs=1,cv=5,verbose=True)
+
+#Fit the model
+rf_clf.fit(X_train,y_train)
+print("Best parameters: {}".format(rf_clf.best_params_))
+rf= rf_clf.predict(X_test)
+rf_clf
+rf = rf.astype(str)
+rf = np.char.replace(rf,'0','False')
+rf = np.char.replace(rf,'1','True')
+rf
+submissiongr = pd.DataFrame(
+    {'PassengerId':test_text["PassengerId"] ,
+     'Transported': rf},columns=['PassengerId', 'Transported'])#
+submissiongr.to_csv("submissiongr.csv",index=False)
+textgr = pd.read_csv('./submissiongr.csv')
+textgr
+X_test
+X_train
+//DecisionTreeRegressor
+dct = DecisionTreeRegressor(
+    criterion='squared_error',
+    splitter='best',
+    min_samples_split=4,
+)
+dct.fit(
+    X_train, 
+    y_train
+)
+DecisionTreeRegressor(min_samples_split=4)
+predictiondc = dct.predict(X_test)
+predictiondc
+predictiondc = predictiondc.astype(int)
+predictiondc
+predictiondc = predictiondc.astype(str)
+predictiondc
+predictiondc = np.char.replace(predictiondc,'0','False')
+predictiondc = np.char.replace(predictiondc,'1','True')
+predictiondc
+
+submissiondct = pd.DataFrame(
+    {'PassengerId':test_text["PassengerId"] ,
+     'Transported': predictiondc},columns=['PassengerId', 'Transported'])
+submissiondct.to_csv("submissiondct.csv",index=False)
+textdct = pd.read_csv('./submissiondct.csv')
+textdct
+
+     
+//
